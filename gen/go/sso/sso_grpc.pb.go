@@ -29,6 +29,8 @@ type AuthClient interface {
 	// IsAdmin checks whether a user is an admin.
 	IsAdmin(ctx context.Context, in *IsAdminRequest, opts ...grpc.CallOption) (*IsAdminResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	MakeAdmin(ctx context.Context, in *MakeAdminRequest, opts ...grpc.CallOption) (*MakeAdminResponse, error)
+	RevokeAdmin(ctx context.Context, in *RevokeAdminRequest, opts ...grpc.CallOption) (*RevokeAdminResponse, error)
 }
 
 type authClient struct {
@@ -75,6 +77,24 @@ func (c *authClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc
 	return out, nil
 }
 
+func (c *authClient) MakeAdmin(ctx context.Context, in *MakeAdminRequest, opts ...grpc.CallOption) (*MakeAdminResponse, error) {
+	out := new(MakeAdminResponse)
+	err := c.cc.Invoke(ctx, "/auth.Auth/MakeAdmin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) RevokeAdmin(ctx context.Context, in *RevokeAdminRequest, opts ...grpc.CallOption) (*RevokeAdminResponse, error) {
+	out := new(RevokeAdminResponse)
+	err := c.cc.Invoke(ctx, "/auth.Auth/RevokeAdmin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServer is the server API for Auth service.
 // All implementations must embed UnimplementedAuthServer
 // for forward compatibility
@@ -86,6 +106,8 @@ type AuthServer interface {
 	// IsAdmin checks whether a user is an admin.
 	IsAdmin(context.Context, *IsAdminRequest) (*IsAdminResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	MakeAdmin(context.Context, *MakeAdminRequest) (*MakeAdminResponse, error)
+	RevokeAdmin(context.Context, *RevokeAdminRequest) (*RevokeAdminResponse, error)
 	mustEmbedUnimplementedAuthServer()
 }
 
@@ -104,6 +126,12 @@ func (UnimplementedAuthServer) IsAdmin(context.Context, *IsAdminRequest) (*IsAdm
 }
 func (UnimplementedAuthServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedAuthServer) MakeAdmin(context.Context, *MakeAdminRequest) (*MakeAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MakeAdmin not implemented")
+}
+func (UnimplementedAuthServer) RevokeAdmin(context.Context, *RevokeAdminRequest) (*RevokeAdminResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeAdmin not implemented")
 }
 func (UnimplementedAuthServer) mustEmbedUnimplementedAuthServer() {}
 
@@ -190,6 +218,42 @@ func _Auth_Logout_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auth_MakeAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MakeAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).MakeAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.Auth/MakeAdmin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).MakeAdmin(ctx, req.(*MakeAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_RevokeAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeAdminRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).RevokeAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.Auth/RevokeAdmin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).RevokeAdmin(ctx, req.(*RevokeAdminRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auth_ServiceDesc is the grpc.ServiceDesc for Auth service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -212,6 +276,14 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Logout",
 			Handler:    _Auth_Logout_Handler,
+		},
+		{
+			MethodName: "MakeAdmin",
+			Handler:    _Auth_MakeAdmin_Handler,
+		},
+		{
+			MethodName: "RevokeAdmin",
+			Handler:    _Auth_RevokeAdmin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

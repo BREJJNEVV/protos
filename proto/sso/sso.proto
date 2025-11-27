@@ -13,7 +13,26 @@ service Auth {
   // IsAdmin checks whether a user is an admin.
   rpc IsAdmin (IsAdminRequest) returns (IsAdminResponse);
   rpc Logout (LogoutRequest) returns (LogoutResponse);
+  rpc MakeAdmin (MakeAdminRequest) returns (MakeAdminResponse);
+  rpc RevokeAdmin (RevokeAdminRequest) returns (RevokeAdminResponse);
 }
+
+message MakeAdminRequest{
+  int64 user_id = 1; 
+}
+
+message MakeAdminResponse{
+  int64 user_id = 1;
+}
+
+message RevokeAdminRequest{
+  int64 user_id = 1; 
+}
+
+message RevokeAdminResponse{
+  int64 user_id = 1;
+}
+
 
 message IsAdminRequest {
   int64 user_id = 1; // User ID to validate.
